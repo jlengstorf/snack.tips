@@ -13,7 +13,9 @@ export function meta() {
 }
 
 export async function getAllLocations(city: string) {
-  const res = await fetch(`http://localhost:3000/api/locations?city=${city}`);
+  const res = await fetch(
+    `https://snack-tips.netlify.app/api/locations?city=${city}`,
+  );
 
   if (!res.ok) {
     throw new Error('Error loading locations');
