@@ -3,11 +3,11 @@
  * quick baseline!
  */
 :root {
-  --color-foreground: hsl(0, 0%, 7%);
-  --color-background: hsl(0, 0%, 100%);
-  --color-links: hsl(213, 100%, 52%);
-  --color-links-hover: hsl(213, 100%, 43%);
-  --color-border: hsl(0, 0%, 82%);
+  --color-foreground: #1a001a;
+  --color-background: #fcf8fc;
+  --color-links: #2752df;
+  --color-links-hover: #486ff0;
+  --color-border: #d0bed0;
   --font-body: -apple-system, 'Segoe UI', Helvetica Neue, Helvetica, Roboto,
     Arial, sans-serif, system-ui, 'Apple Color Emoji', 'Segoe UI Emoji';
 }
@@ -41,6 +41,7 @@ body {
 
 body {
   font-family: var(--font-body);
+  font-size: 18px;
   line-height: 1.5;
 }
 
@@ -72,8 +73,14 @@ a:hover {
 }
 
 footer {
+  font-size: 0.875rem;
   margin-top: 4rem;
   text-align: center;
+}
+
+footer a,
+footer a:hover {
+  color: inherit;
 }
 
 .sr-only {

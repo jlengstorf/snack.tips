@@ -11,19 +11,16 @@
   width: min(90vw, 700px);
 }
 
-.location-name {
+.place-name {
   margin: 0;
 }
 
-.location-details {
+.place-details {
 }
 
 .address {
   margin-top: 0;
   font-size: 0.875rem;
-}
-
-.location-nav {
 }
 
 .link {
