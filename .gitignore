@@ -4,3 +4,5 @@ node_modules
 /public/build
 /.netlify
 .env
+dist
+sanity/config/@sanity/google-maps-input.json
