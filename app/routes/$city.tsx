@@ -14,8 +14,8 @@ export function meta() {
 
 export async function getAllPlaces(city: string) {
   const res = await fetch(
-    `http://localhost:3000/api/places?city=${city}`,
-    // `https://snack-tips.netlify.app/api/places?city=${city}`,
+    // `http://localhost:3000/api/places?city=${city}`,
+    `https://snack.tips/api/places?city=${city}`,
   );
 
   if (!res.ok) {
