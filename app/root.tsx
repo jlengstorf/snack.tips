@@ -135,7 +135,11 @@ function Layout({ children }: { children: React.ReactNode }) {
 
       <footer>
         <div>
-          <p>&copy; You!</p>
+          <p>
+            built with &hearts; by{' '}
+            <a href="https://jason.af">Jason Lengstorf</a> ·{' '}
+            <a href="https://github.com/jlengstorf/snack.tips">source code</a>
+          </p>
         </div>
       </footer>
     </>
