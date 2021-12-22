@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import mapboxgl, { Map, MapboxGeoJSONFeature } from 'mapbox-gl';
 
 import mapboxStyles from 'mapbox-gl/dist/mapbox-gl.css';
-import styles from '~/styles/locations.css';
+import styles from '~/styles/city.css';
 
 export function meta() {
   return {
@@ -12,44 +12,37 @@ export function meta() {
   };
 }
 
-export async function getAllLocations(city: string) {
+export async function getAllPlaces(city: string) {
   const res = await fetch(
-    `https://snack-tips.netlify.app/api/locations?city=${city}`,
+    `http://localhost:3000/api/places?city=${city}`,
+    // `https://snack-tips.netlify.app/api/places?city=${city}`,
   );
 
   if (!res.ok) {
-    throw new Error('Error loading locations');
+    throw new Error('Error loading places');
   }
 
-  const features = await res.json();
-
-  return {
-    type: 'geojson',
-    data: {
-      type: 'FeatureCollection',
-      features,
-    },
-  };
+  return await res.json();
 }
 
-export async function getLocation(city: string, slug: string) {
-  const locations = await getAllLocations(city);
+export async function getPlace(city: string, slug: string) {
+  const places = await getAllPlaces(city);
 
-  return locations.data.features.find(
+  return places.data.features.find(
     (l: MapboxGeoJSONFeature) => l?.properties?.slug === slug,
   );
 }
 
 export const loader: LoaderFunction = async ({ params }) => {
-  const { location } = params;
+  const { city } = params;
 
-  if (!location) {
-    throw new Error('no location found!');
+  if (!city) {
+    throw new Error('no city found!');
   }
 
-  const locations = await getAllLocations(location);
+  const places = await getAllPlaces(city);
 
-  return { locations, token: process.env.MAPBOX_ACCESS_TOKEN };
+  return { places, token: process.env.MAPBOX_ACCESS_TOKEN };
 };
 
 export function links() {
@@ -62,12 +55,12 @@ export function links() {
 let map: Map;
 let activeMarkerId: string | number | undefined;
 
-export default function Location() {
+export default function City() {
   let navigate = useNavigate();
-  const { location } = useParams();
-  const { locations, token } = useLoaderData();
+  const { city, place } = useParams();
+  const { places, token } = useLoaderData();
 
-  function updateActiveMarker(place: MapboxGeoJSONFeature) {
+  function updateActiveMarker(place?: MapboxGeoJSONFeature) {
     if (!map) {
       return;
     }
@@ -77,6 +70,10 @@ export default function Location() {
         { source: 'places', id: activeMarkerId },
         { active: false },
       );
+    }
+
+    if (!place) {
+      return;
     }
 
     activeMarkerId = place?.id;
@@ -101,7 +98,7 @@ export default function Location() {
     });
 
     map.on('load', () => {
-      map.addSource('places', locations);
+      map.addSource('places', places);
 
       map.addLayer({
         id: 'places',
@@ -114,7 +111,7 @@ export default function Location() {
           'circle-color': [
             'case',
             ['boolean', ['feature-state', 'active'], false],
-            '#eb00eb',
+            '#ca00ca',
             '#eb77eb',
           ],
           'circle-radius': [
@@ -123,10 +120,23 @@ export default function Location() {
             6,
             4,
           ],
-          // 'circle-stroke-width': 1,
-          // 'circle-stroke-color': '#ffffff',
         },
       });
+
+      if (place) {
+        const currentPlace = places.data.features.find(
+          (l: MapboxGeoJSONFeature) => l?.properties?.slug === place,
+        );
+
+        if (currentPlace) {
+          updateActiveMarker(currentPlace);
+
+          map.flyTo({
+            center: currentPlace?.geometry?.coordinates,
+            zoom: 14,
+          });
+        }
+      }
 
       map.on('click', 'places', (e) => {
         const place = e?.features?.[0];
@@ -137,7 +147,7 @@ export default function Location() {
 
         updateActiveMarker(place);
 
-        navigate(`/${location}/${place?.properties?.slug}`);
+        navigate(`/${city}/${place?.properties?.slug}`);
 
         map.flyTo({
           center: place?.geometry?.coordinates,
@@ -155,25 +165,39 @@ export default function Location() {
     });
   }, []);
 
+  function resetMapPosition(event: MouseEvent) {
+    event.preventDefault();
+
+    map.flyTo({
+      center: [-122.6784, 45.5152],
+      zoom: 11.25,
+    });
+
+    updateActiveMarker();
+
+    navigate(`/${city}`);
+  }
+
   return (
     <main>
       <div id="map" className="map"></div>
 
       <div className="map-grid">
-        <section className="location-details">
-          <Outlet />
+        <section className="place-details">
+          <Outlet context={resetMapPosition} />
         </section>
 
-        <aside className="location-nav">
-          {locations.data.features.map((l: MapboxGeoJSONFeature) => {
+        <aside className="place-nav">
+          {places.data.features.map((l: MapboxGeoJSONFeature) => {
             if (!l.properties) {
               return null;
             }
 
-            function handleClick(event) {
+            function handleClick(event: MouseEvent) {
               event.preventDefault();
               map.flyTo({
                 center: l.geometry.coordinates,
+                zoom: 14,
               });
               updateActiveMarker(l);
               navigate(`/${l?.properties?.city}/${l?.properties?.slug}`);
